@@ -42,7 +42,7 @@ if data is not None:
     bp = st.number_input("Enter your resting blood pressure (mm Hg):", min_value=0, max_value=300, value=120)
     chest_pain = st.selectbox("Do you experience chest pain?", le_chest_pain.classes_)
     cholesterol = st.slider("Enter your cholesterol level (mg/dL):", min_value=100, max_value=400, value=200)
-    sex = st.radio("Select your gender:", ["Male", "Female"])
+    sex = st.radio("Select your gender:", le_sex.classes_)
 
     # Encode user inputs
     try:
