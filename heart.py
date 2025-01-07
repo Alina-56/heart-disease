@@ -22,14 +22,21 @@ if data is not None:
 
     data['Sex'] = le_sex.fit_transform(data['Sex'])  # Encode 'Sex' (M=1, F=0)
 
-    # Filter features for the model
-    X = data[['Cholesterol', 'Sex']]
-    y = data['HeartDisease']
+    # Separate datasets for males and females
+    male_data = data[data['Sex'] == 1]
+    female_data = data[data['Sex'] == 0]
 
-    # Train a simple logistic regression model
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    model = LogisticRegression()
-    model.fit(X_train, y_train)
+    # Train models for males and females
+    male_X = male_data[['Cholesterol']]
+    male_y = male_data['HeartDisease']
+    female_X = female_data[['Cholesterol']]
+    female_y = female_data['HeartDisease']
+
+    male_model = LogisticRegression()
+    female_model = LogisticRegression()
+
+    male_model.fit(male_X, male_y)
+    female_model.fit(female_X, female_y)
 
     # Streamlit app
     st.title("Heart Disease Prediction Based on Cholesterol Levels")
@@ -47,67 +54,51 @@ if data is not None:
         sex_encoded = le_sex.transform([sex])[0]  # Encode sex
         chest_pain_encoded = 1 if chest_pain == "Yes" else 0  # Convert chest pain to binary
 
+        # Select model based on gender
+        if sex_encoded == 1:
+            model = male_model
+            gender_data = male_data
+            gender = "Male"
+        else:
+            model = female_model
+            gender_data = female_data
+            gender = "Female"
+
         # Prediction
-        input_data = np.array([[cholesterol, sex_encoded]])
+        input_data = np.array([[cholesterol]])
         prediction = model.predict(input_data)[0]
         predicted_prob = model.predict_proba(input_data)[0][1]
 
         st.subheader("Prediction Result")
         if prediction == 1:
-            st.write(f"**You are likely to have heart disease. Probability: {predicted_prob:.2f}**")
+            st.write(f"**As a {gender}, you are likely to have heart disease. Probability: {predicted_prob:.2f}**")
         else:
-            st.write(f"**You are unlikely to have heart disease. Probability: {predicted_prob:.2f}**")
+            st.write(f"**As a {gender}, you are unlikely to have heart disease. Probability: {predicted_prob:.2f}**")
 
-        # Visualization
-        male_data = data[data['Sex'] == 1]
-        female_data = data[data['Sex'] == 0]
-
-        fig, ax = plt.subplots(1, 2, figsize=(12, 6))
-
-        # Male plot
-        ax[0].scatter(male_data['Cholesterol'], male_data['HeartDisease'], alpha=0.5, label="Data")
-        ax[0].set_title("Male: Cholesterol vs Heart Disease")
-        ax[0].set_xlabel("Cholesterol")
-        ax[0].set_ylabel("Heart Disease")
-        ax[0].legend()
-
-        # Female plot
-        ax[1].scatter(female_data['Cholesterol'], female_data['HeartDisease'], alpha=0.5, label="Data", color="orange")
-        ax[1].set_title("Female: Cholesterol vs Heart Disease")
-        ax[1].set_xlabel("Cholesterol")
-        ax[1].set_ylabel("Heart Disease")
-        ax[1].legend()
+        # Visualization for the selected gender
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.scatter(gender_data['Cholesterol'], gender_data['HeartDisease'], alpha=0.5, label="Data")
+        cholesterol_range = np.linspace(100, 400, 50).reshape(-1, 1)
+        probabilities = model.predict_proba(cholesterol_range)[:, 1]
+        ax.plot(cholesterol_range, probabilities, label="Prediction Probability", color="red")
+        ax.set_title(f"{gender}: Cholesterol vs Heart Disease")
+        ax.set_xlabel("Cholesterol")
+        ax.set_ylabel("Heart Disease Probability")
+        ax.legend()
 
         st.pyplot(fig)
-
-        # Line chart visualization
-        cholesterol_range = np.linspace(100, 400, 50)
-        probabilities = []
-
-        for chol in cholesterol_range:
-            prob = model.predict_proba([[chol, sex_encoded]])[0][1]
-            probabilities.append(prob)
-
-        line_fig, line_ax = plt.subplots(figsize=(10, 6))
-        line_ax.plot(cholesterol_range, probabilities, label="Prediction Probability", color="blue")
-        line_ax.set_title("Heart Disease Probability vs Cholesterol")
-        line_ax.set_xlabel("Cholesterol")
-        line_ax.set_ylabel("Probability of Heart Disease")
-        line_ax.legend()
-
-        st.pyplot(line_fig)
 
         # Simple Linear Regression Graph
         from sklearn.linear_model import LinearRegression
         slr_model = LinearRegression()
-        slr_model.fit(X_train[['Cholesterol']], y_train)
+        slr_model.fit(gender_data[['Cholesterol']], gender_data['HeartDisease'])
 
-        predicted_values = slr_model.predict(np.array(cholesterol_range).reshape(-1, 1))
+        predicted_values = slr_model.predict(cholesterol_range)
 
         slr_fig, slr_ax = plt.subplots(figsize=(10, 6))
-        slr_ax.scatter(X_train['Cholesterol'], y_train, alpha=0.5, label="Training Data")
-        slr_ax.plot(cholesterol_range, predicted_values, label="SLR Prediction", color="red")
-        slr_ax.set_title("Simple Linear Regression: Cholesterol vs Heart Disease")
+        slr_ax.scatter(gender_data['Cholesterol'], gender_data['HeartDisease'], alpha=0.5, label="Data")
+        slr_ax.plot(cholesterol_range, predicted_values, label="SLR Prediction", color="blue")
+        slr_ax.set_title(f"Simple Linear Regression ({gender}): Cholesterol vs Heart Disease")
         slr_ax.set_xlabel("Cholesterol")
         slr_ax.set_ylabel("Heart Disease")
         slr_ax.legend()
