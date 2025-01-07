@@ -88,24 +88,12 @@ if data is not None:
         else:
             st.write(f"**As a {gender}, you are unlikely to have heart disease. Probability: {predicted_prob:.2f}**")
 
-        # Visualization for the selected gender using Logistic Regression (for probabilities)
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.scatter(gender_data['Cholesterol'], gender_data['HeartDisease'], alpha=0.5, label="Data")
-        cholesterol_range = np.linspace(100, 400, 50).reshape(-1, 1)
-        probabilities = model.predict_proba(cholesterol_range)[:, 1]  # Get probabilities from logistic regression
-        ax.plot(cholesterol_range, probabilities, label="Prediction Probability", color="red")
-        ax.set_title(f"{gender}: Cholesterol vs Heart Disease Probability (Logistic Regression)")
-        ax.set_xlabel("Cholesterol")
-        ax.set_ylabel("Heart Disease Probability")
-        ax.legend()
-
-        st.pyplot(fig)
-
         # Simple Linear Regression Graph for the binary outcome
         from sklearn.linear_model import LinearRegression
         slr_model = LinearRegression()
         slr_model.fit(gender_data[['Cholesterol']], gender_data['HeartDisease'])
 
+        cholesterol_range = np.linspace(100, 400, 50).reshape(-1, 1)
         predicted_values = slr_model.predict(cholesterol_range)
 
         slr_fig, slr_ax = plt.subplots(figsize=(10, 6))
