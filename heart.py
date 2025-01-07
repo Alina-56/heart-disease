@@ -19,10 +19,8 @@ data = load_data()
 if data is not None:
     # Preprocess the data
     le_sex = LabelEncoder()
-    le_chest_pain = LabelEncoder()
 
     data['Sex'] = le_sex.fit_transform(data['Sex'])  # Encode 'Sex' (M=1, F=0)
-    data['ChestPainType'] = le_chest_pain.fit_transform(data['ChestPainType'])  # Encode chest pain type
 
     # Filter features for the model
     X = data[['Cholesterol', 'Sex']]
@@ -40,14 +38,14 @@ if data is not None:
     # User inputs
     age = st.number_input("Enter your age:", min_value=0, max_value=120, value=30)
     bp = st.number_input("Enter your resting blood pressure (mm Hg):", min_value=0, max_value=300, value=120)
-    chest_pain = st.selectbox("Do you experience chest pain?", le_chest_pain.classes_)
+    chest_pain = st.radio("Do you experience chest pain?", ["Yes", "No"])
     cholesterol = st.slider("Enter your cholesterol level (mg/dL):", min_value=100, max_value=400, value=200)
     sex = st.radio("Select your gender:", le_sex.classes_)
 
     # Encode user inputs
     try:
         sex_encoded = le_sex.transform([sex])[0]  # Encode sex
-        chest_pain_encoded = le_chest_pain.transform([chest_pain])[0]  # Encode chest pain
+        chest_pain_encoded = 1 if chest_pain == "Yes" else 0  # Convert chest pain to binary
 
         # Prediction
         input_data = np.array([[cholesterol, sex_encoded]])
