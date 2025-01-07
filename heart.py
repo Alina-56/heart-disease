@@ -14,6 +14,16 @@ def load_data():
         st.error("The dataset 'heart.csv' was not found. Please ensure it is in the same directory as this script.")
         return None
 
+# Function to remove outliers based on IQR
+def remove_outliers(data):
+    Q1 = data['Cholesterol'].quantile(0.25)
+    Q3 = data['Cholesterol'].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    filtered_data = data[(data['Cholesterol'] >= lower_bound) & (data['Cholesterol'] <= upper_bound)]
+    return filtered_data
+
 data = load_data()
 
 if data is not None:
@@ -21,6 +31,9 @@ if data is not None:
     le_sex = LabelEncoder()
 
     data['Sex'] = le_sex.fit_transform(data['Sex'])  # Encode 'Sex' (M=1, F=0)
+
+    # Remove outliers
+    data = remove_outliers(data)
 
     # Separate datasets for males and females
     male_data = data[data['Sex'] == 1]
