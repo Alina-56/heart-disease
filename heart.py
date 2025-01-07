@@ -106,6 +106,17 @@ if data is not None:
 
         st.pyplot(slr_fig)
 
+        # Visualization: Line Chart Cholesterol vs Age
+        line_fig, line_ax = plt.subplots(figsize=(10, 6))
+        age_cholesterol_data = data.groupby('Age')['Cholesterol'].mean()  # Mean cholesterol by age
+        line_ax.plot(age_cholesterol_data.index, age_cholesterol_data.values, marker='o', color='green', label='Avg Cholesterol')
+        line_ax.set_title('Cholesterol vs Age (Average Cholesterol by Age)')
+        line_ax.set_xlabel('Age')
+        line_ax.set_ylabel('Average Cholesterol Level')
+        line_ax.legend()
+
+        st.pyplot(line_fig)
+
     except Exception as e:
         st.error(f"An error occurred during prediction or visualization: {e}")
 else:
