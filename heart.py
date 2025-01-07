@@ -117,6 +117,17 @@ if data is not None:
 
         st.pyplot(line_fig)
 
+        # Visualization: Bar Chart Age vs Blood Pressure
+        bar_fig, bar_ax = plt.subplots(figsize=(10, 6))
+        age_bp_data = data.groupby('Age')['RestingBP'].mean()  # Average blood pressure by age
+        bar_ax.bar(age_bp_data.index, age_bp_data.values, color='orange', label='Avg Blood Pressure')
+        bar_ax.set_title('Blood Pressure vs Age (Average Blood Pressure by Age)')
+        bar_ax.set_xlabel('Age')
+        bar_ax.set_ylabel('Average Blood Pressure (mm Hg)')
+        bar_ax.legend()
+
+        st.pyplot(bar_fig)
+
     except Exception as e:
         st.error(f"An error occurred during prediction or visualization: {e}")
 else:
