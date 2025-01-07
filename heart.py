@@ -80,6 +80,40 @@ if data is not None:
 
         st.pyplot(fig)
 
+        # Line chart visualization
+        cholesterol_range = np.linspace(100, 400, 50)
+        probabilities = []
+
+        for chol in cholesterol_range:
+            prob = model.predict_proba([[chol, sex_encoded]])[0][1]
+            probabilities.append(prob)
+
+        line_fig, line_ax = plt.subplots(figsize=(10, 6))
+        line_ax.plot(cholesterol_range, probabilities, label="Prediction Probability", color="blue")
+        line_ax.set_title("Heart Disease Probability vs Cholesterol")
+        line_ax.set_xlabel("Cholesterol")
+        line_ax.set_ylabel("Probability of Heart Disease")
+        line_ax.legend()
+
+        st.pyplot(line_fig)
+
+        # Simple Linear Regression Graph
+        from sklearn.linear_model import LinearRegression
+        slr_model = LinearRegression()
+        slr_model.fit(X_train[['Cholesterol']], y_train)
+
+        predicted_values = slr_model.predict(np.array(cholesterol_range).reshape(-1, 1))
+
+        slr_fig, slr_ax = plt.subplots(figsize=(10, 6))
+        slr_ax.scatter(X_train['Cholesterol'], y_train, alpha=0.5, label="Training Data")
+        slr_ax.plot(cholesterol_range, predicted_values, label="SLR Prediction", color="red")
+        slr_ax.set_title("Simple Linear Regression: Cholesterol vs Heart Disease")
+        slr_ax.set_xlabel("Cholesterol")
+        slr_ax.set_ylabel("Heart Disease")
+        slr_ax.legend()
+
+        st.pyplot(slr_fig)
+
     except Exception as e:
         st.error(f"An error occurred during prediction or visualization: {e}")
 else:
